@@ -1,4 +1,4 @@
-# Backend Intern Assignment
+# PrimetradeAI Backend Assignment
 
 A scalable REST API with JWT authentication and role-based access control.
 
