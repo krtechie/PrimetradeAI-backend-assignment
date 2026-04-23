@@ -48,6 +48,12 @@ app.use('/api/v1/auth', authLimiter);
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 
+// Add API version header to every response
+app.use((req, res, next) => {
+  res.setHeader('X-API-Version', 'v1');
+  next();
+});
+
 // Swagger docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'PrimeTradeAI API Docs',
