@@ -8,7 +8,6 @@ const {
   deleteTask,
 } = require('../../controllers/taskController');
 const authenticate = require('../../middleware/auth');
-const authorizeRoles = require('../../middleware/roleCheck');
 
 /**
  * @swagger
@@ -21,15 +20,23 @@ const authorizeRoles = require('../../middleware/roleCheck');
  * @swagger
  * /api/v1/tasks:
  *   get:
- *     summary: Get all tasks (admin gets all, user gets own)
+ *     summary: Get all tasks (admin sees all, user sees own)
  *     tags: [Tasks]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: List of tasks
+ *         description: List of tasks fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TasksResponse'
  *       401:
  *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/', authenticate, getAllTasks);
 
@@ -37,7 +44,7 @@ router.get('/', authenticate, getAllTasks);
  * @swagger
  * /api/v1/tasks/{id}:
  *   get:
- *     summary: Get a task by ID
+ *     summary: Get a single task by ID
  *     tags: [Tasks]
  *     security:
  *       - bearerAuth: []
@@ -47,9 +54,17 @@ router.get('/', authenticate, getAllTasks);
  *         required: true
  *         schema:
  *           type: string
+ *           format: uuid
+ *         description: Task UUID
  *     responses:
  *       200:
- *         description: Task details
+ *         description: Task fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TaskResponse'
+ *       403:
+ *         description: Access denied
  *       404:
  *         description: Task not found
  */
@@ -68,23 +83,18 @@ router.get('/:id', authenticate, getTaskById);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required: [title]
- *             properties:
- *               title:
- *                 type: string
- *                 example: My first task
- *               description:
- *                 type: string
- *                 example: Task description here
- *               status:
- *                 type: string
- *                 enum: [pending, in_progress, completed]
+ *             $ref: '#/components/schemas/CreateTaskRequest'
  *     responses:
  *       201:
  *         description: Task created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TaskResponse'
  *       400:
  *         description: Validation error
+ *       401:
+ *         description: Unauthorized
  */
 router.post('/', authenticate, createTask);
 
@@ -92,7 +102,7 @@ router.post('/', authenticate, createTask);
  * @swagger
  * /api/v1/tasks/{id}:
  *   put:
- *     summary: Update a task
+ *     summary: Update an existing task
  *     tags: [Tasks]
  *     security:
  *       - bearerAuth: []
@@ -102,23 +112,21 @@ router.post('/', authenticate, createTask);
  *         required: true
  *         schema:
  *           type: string
+ *           format: uuid
+ *         description: Task UUID
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               title:
- *                 type: string
- *               description:
- *                 type: string
- *               status:
- *                 type: string
- *                 enum: [pending, in_progress, completed]
+ *             $ref: '#/components/schemas/UpdateTaskRequest'
  *     responses:
  *       200:
  *         description: Task updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TaskResponse'
  *       403:
  *         description: Access denied
  *       404:
@@ -140,6 +148,8 @@ router.put('/:id', authenticate, updateTask);
  *         required: true
  *         schema:
  *           type: string
+ *           format: uuid
+ *         description: Task UUID
  *     responses:
  *       200:
  *         description: Task deleted successfully

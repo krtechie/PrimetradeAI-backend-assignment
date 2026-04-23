@@ -22,26 +22,26 @@ const authenticate = require('../../middleware/auth');
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required: [name, email, password]
- *             properties:
- *               name:
- *                 type: string
- *                 example: John Doe
- *               email:
- *                 type: string
- *                 example: john@example.com
- *               password:
- *                 type: string
- *                 example: secret123
- *               role:
- *                 type: string
- *                 enum: [user, admin]
+ *             $ref: '#/components/schemas/RegisterRequest'
  *     responses:
  *       201:
  *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       409:
  *         description: Email already registered
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post('/register', register);
 
@@ -49,7 +49,7 @@ router.post('/register', register);
  * @swagger
  * /api/v1/auth/login:
  *   post:
- *     summary: Login and receive JWT
+ *     summary: Login and receive JWT token
  *     tags: [Auth]
  *     security: []
  *     requestBody:
@@ -57,20 +57,20 @@ router.post('/register', register);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required: [email, password]
- *             properties:
- *               email:
- *                 type: string
- *                 example: john@example.com
- *               password:
- *                 type: string
- *                 example: secret123
+ *             $ref: '#/components/schemas/LoginRequest'
  *     responses:
  *       200:
- *         description: Login successful, JWT returned
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
  *       401:
  *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post('/login', login);
 
@@ -85,8 +85,24 @@ router.post('/login', login);
  *     responses:
  *       200:
  *         description: Current user data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
  *       401:
  *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get('/me', authenticate, getMe);
 
