@@ -2,6 +2,12 @@ const { z } = require('zod');
 const { Task, User } = require('../models/index');
 const { sendSuccess, sendError } = require('../utils/response');
 
+// Sanitize string — strip HTML tags and trim whitespace
+const sanitize = (str) => {
+  if (typeof str !== 'string') return str;
+  return str.replace(/<[^>]*>/g, '').trim();
+};
+
 // Zod validation schemas
 const createTaskSchema = z.object({
   title: z.string().min(1).max(200),
@@ -62,6 +68,9 @@ const getTaskById = async (req, res, next) => {
 // POST /api/v1/tasks
 const createTask = async (req, res, next) => {
   try {
+    req.body.title = sanitize(req.body.title);
+    req.body.description = sanitize(req.body.description);
+
     const parsed = createTaskSchema.safeParse(req.body);
     if (!parsed.success) {
       return sendError(res, parsed.error.errors[0].message, 400);
@@ -85,6 +94,9 @@ const createTask = async (req, res, next) => {
 // PUT /api/v1/tasks/:id
 const updateTask = async (req, res, next) => {
   try {
+    if (req.body.title) req.body.title = sanitize(req.body.title);
+    if (req.body.description) req.body.description = sanitize(req.body.description);
+
     const parsed = updateTaskSchema.safeParse(req.body);
     if (!parsed.success) {
       return sendError(res, parsed.error.errors[0].message, 400);

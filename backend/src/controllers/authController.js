@@ -3,6 +3,12 @@ const { z } = require('zod');
 const { User } = require('../models/index');
 const { sendSuccess, sendError } = require('../utils/response');
 
+// Sanitize string — strip HTML tags and trim whitespace
+const sanitize = (str) => {
+  if (typeof str !== 'string') return str;
+  return str.replace(/<[^>]*>/g, '').trim();
+};
+
 // Zod validation schemas
 const registerSchema = z.object({
   name: z.string().min(2).max(100),
@@ -26,7 +32,10 @@ const generateToken = (userId) => {
 // POST /api/v1/auth/register
 const register = async (req, res, next) => {
   try {
-    // Validate input
+    // Sanitize before validation
+    req.body.name = sanitize(req.body.name);
+    req.body.email = sanitize(req.body.email);
+
     const parsed = registerSchema.safeParse(req.body);
     if (!parsed.success) {
       return sendError(res, parsed.error.errors[0].message, 400);
