@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const hpp = require('hpp');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
 const v1Routes = require('./routes/v1/index');
@@ -9,31 +10,59 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-// Security
+// Security headers
 app.use(helmet());
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 min
+// CORS — only allow frontend origin
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production'
+    ? process.env.FRONTEND_URL
+    : 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Prevent HTTP parameter pollution
+app.use(hpp());
+
+// Global rate limiter
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
   message: { success: false, message: 'Too many requests, please try again later.' },
 });
-app.use('/api', limiter);
+app.use('/api', globalLimiter);
 
-// Body parser
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// Strict rate limiter for auth routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10, // max 10 login/register attempts per 15 min
+  message: { success: false, message: 'Too many auth attempts, please try again later.' },
+});
+app.use('/api/v1/auth', authLimiter);
+
+// Body parser with size limit
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 
 // Swagger docs
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customSiteTitle: 'PrimeTradeAI API Docs',
+}));
 
 // API routes
 app.use('/api/v1', v1Routes);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    version: 'v1',
+  });
 });
 
 // 404 handler
