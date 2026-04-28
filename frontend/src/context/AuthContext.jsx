@@ -23,7 +23,11 @@ export const AuthProvider = ({ children }) => {
       toast.success('Logged in successfully!');
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Login failed');
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Login failed. Please try again.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -39,7 +43,11 @@ export const AuthProvider = ({ children }) => {
       toast.success('Account created successfully!');
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Registration failed');
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Registration failed. Please try again.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }

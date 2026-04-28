@@ -11,6 +11,19 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Frontend validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email)) {
+      toast.error('Please enter a valid email address (e.g. john@example.com)');
+      return;
+    }
+
+    if (form.password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+
     register(form.name, form.email, form.password);
   };
 
