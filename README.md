@@ -1,4 +1,4 @@
-# PrimeTradeAI Backend Assignment
+# Task Application Assignment
 
 A scalable REST API built with Node.js and Express featuring JWT authentication, role-based access control, and a React frontend.
 

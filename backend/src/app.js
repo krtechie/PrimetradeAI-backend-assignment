@@ -56,7 +56,7 @@ app.use((req, res, next) => {
 
 // Swagger docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customSiteTitle: 'PrimeTradeAI API Docs',
+  customSiteTitle: 'Task Application API Docs',
 }));
 
 // API routes

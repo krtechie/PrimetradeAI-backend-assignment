@@ -4,7 +4,7 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Backend Assignment API',
+      title: 'Task Application API',
       version: '1.0.0',
       description: 'Scalable REST API with JWT authentication and role-based access control',
       contact: {

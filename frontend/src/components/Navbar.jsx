@@ -5,7 +5,7 @@ const Navbar = () => {
 
   return (
     <nav style={styles.nav}>
-      <div style={styles.logo}>PrimeTradeAI</div>
+      <div style={styles.logo}>Task Application</div>
       <div style={styles.right}>
         {user && (
           <>
